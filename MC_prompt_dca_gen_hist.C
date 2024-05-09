@@ -25,8 +25,6 @@
 #include "TString.h"
 #include "TObjString.h"
 
-#include "/home/chand140/Continue_Event_shape_engineering/Event_shape_engineering/Analysis/CMSSW_10_3_3_patch1/src/prompt_D0/include/q2_bin_distribution.h" //latest q2 distribution
-
 using namespace std;
 
 #define  MAX_XB    1500
@@ -135,8 +133,7 @@ int MC_prompt_dca_gen_hist(TString sc_val="", TString cent_name_input="")
 
   double BDT_weight[MAX_XB];
 
-  //TString filename = "/scratch/bell/chand140/ESE_output_Dec_26/MC_output/MC_prompt_with_BDT.root";
-  string filename = "/scratch/bell/chand140/ESE_output_Mar_11_2024/MC_output/MC_prompt_with_BDT_cen"+cent_name+".root";
+  string filename = "inputfile.root";
   if (!TFile::Open(filename.c_str()))   { cout << " fail to open file" << endl; return 0;}	 
   TFile* f = TFile::Open(filename.c_str());
   cout << "Opened file " << filename <<endl;
@@ -179,39 +176,19 @@ int MC_prompt_dca_gen_hist(TString sc_val="", TString cent_name_input="")
   //TH1D *hist_data_dca[N_PTBINS];
   Double_t dca_edges[N_DCABINS+1]={0,0.00109,0.0024,0.0039,0.0059,0.0085,0.01179,0.016,0.0214,0.028,0.0366,0.0475,0.0615,0.079,0.10145,0.135};
 
-  //auto inf_data = TFile::Open("dca_hist_output.root");
-
-  //dca_edges[N_DCABINS+1]={0,0.00109,0.0024,0.0039,0.0059,0.0085,0.012,0.145};
-  //for (int i_cen=0; i_cen<1; i_cen++) {
     
   for (int i_pt=0; i_pt<N_PTBINS; i_pt++) {
     hist_MC_prompt_dca[i_pt] = new TH1D("hist_MC_prompt_dca_cen_"+cent_name+"_pt_"+pt_name[i_pt],"hist_MC_prompt_dca_cen_"+cent_name+"_pt_"+pt_name[i_pt],N_DCABINS,dca_edges);
   }
 
-  //}
-
-  /*TString nt_name;
-    TNtuple *nt[N_CENTBINS][N_PTBINS];
-
-    for (int i_cen=0; i_cen<N_CENTBINS; i_cen++) {
-    for (int i_pt=0; i_pt<N_PTBINS; i_pt++) {
-    nt_name = "ntuple_cen_"+cen_name[i_cen]+"_pt_"+pt_name[i_pt];
-    nt[i_cen][i_pt] = new TNtuple(nt_name,nt_name,"mass:dca");
-    }
-    }*/
 
   int n_entries = t1->GetEntries();
   cout << "Reading input MC file \n" << endl;
   for (int i_entry = 0; i_entry < n_entries; i_entry++)
   {
-    //if (i_entry > 100) break;
     t1->GetEntry(i_entry);
     if(i_entry%40000==0) cout <<i_entry<<" / "<<n_entries<< "  "<<100*i_entry/n_entries<<"%"<<endl;
 
-    //for (int i_cen=0; i_cen<1; i_cen++)
-    //{
-      //if (cen_val>=cen_edges[i_cen] && cen_val<cen_edges[i_cen+1])  //centrality cuts taken from the input file here
-      //{
         for (int i_cand=0; i_cand<candSize; i_cand++)
         {
           if(fabs(y_val[i_cand])>=1.0 || Dtrk1Chi2n[i_cand]>=0.18 || Dtrk2Chi2n[i_cand]>=0.18 || abs(parent_id[i_cand])>400 || alpha[i_cand]>=0.2) continue;
@@ -225,17 +202,11 @@ int MC_prompt_dca_gen_hist(TString sc_val="", TString cent_name_input="")
             Dgenalpha = dir.Angle(pgen1);
             Dgendl = dir.Mag();
 
-            // to check the smearing code
-            /*if(pT_val[i_cand]>=20 && pT_val[i_cand]<30 &&  cen_val>=40 && cen_val<60) 
-              {
-              cout << " Dgenalpha: "<< Dgenalpha << " Dgendl: " << Dgendl << " DCA: " << dca_val[i_cand] << " scaled DCA: " << Dgendl*sin(Dgenalpha)+ sc*(dca_val[i_cand]-Dgendl*sin(Dgenalpha)) << endl;
-              }*/
 
             hist_MC_prompt_dca[i_pt]->Fill(Dgendl*sin(Dgenalpha)+ sc*(dca_val[i_cand]-Dgendl*sin(Dgenalpha)));
           }		
         }
-      //}
-    //}
+
   } //for loop i_entry
 
   f->Close();
